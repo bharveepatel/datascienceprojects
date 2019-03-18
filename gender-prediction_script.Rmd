@@ -1,0 +1,60 @@
+---
+title: "Gender Prediction"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# install.packages('devtools')
+#devtools::install_github("kalimu/genderizeR")
+#install.packages('genderizeR')
+library(genderizeR)
+```
+
+
+```{r}
+#string of first names
+jmc_first_names = c('calanit','congyan','haonan','ipsita','phakawa','salifou','yiqin','gewei','hongyan','mu-jeung','hideyuki','hosung','insook','teferi','sin','viacheslav','sikandra','stanislao','stanislao','tarso','yiwen','yongdong','boriska','xi','ritadhi','ritadhi','sandile','ting-hao','jiun-hua','zhimin','caglar','dessislava','viktar','hongtao','taesu','chuanqi','lucrezio','xiaoping','chen-yu','junghyun','naijing','choon','mashfiqur','qianqian','baisi','krastina','tomohide','wenzhi','linxia','minwoong','nakcheon','byoung','caixia','hyo-youn','kyounghwan','sungju','toshiaki','arup','chun-wing','jiawen','sudipto','tzu-hsin','yanfei','yoichiro','eyno','huailu','seong','tak-yuen','tianxu','anindya','hyungseok','mengxi','mingli','yangshin','engin','guihai','mengmeng','shuheng','shunan','liangliang','svetoslav','wenjia','muruvvet','debajyoti','baojun','yubao','batchimeg','cigdem','ersin','shutian','yongjin','atanu','saifedean','sung-woo','yinghua','zaozao','luminita','w.','s.','wooram','booyuel','hyelim','fangzhou','jaehyun','naihobe','seungjun','soule','tse-ling','guojun','ipshita','menghan','savitar','shaowen','yunru','ajin','jaehyun','kunjal','meiping','soo-young','willyanne','yogita','zheli','bikramaditya','ding','golvine','jaehyun','jean-jacques','meeroo','seunghoon','tuo','xiaotao','itthipong','saiful','thanasin','warong','yujun','paitoon','qinwen','shuang','sivalai','anuk','freeha','inka','jingxian','peilin','sutee','weishi','chayanee','dipayan','zhuo','sharmini','jongrim','xi','yijun','bingyan','hautahi','kibrom','liyuan','nobuyuki','sida','yiwei','zhonghao','jianwei','vesall','changho','chia-wen','fujin','yoon-kyung','bo-young','joeri','chi-hung','guojun','hang-wei','angsoka','kassahun','kyunghun','wenjun','xiaochen')
+
+jmc_first_names2 = c('jisang','naama','wenbo','zhaomiao','il','jongkwan','lijuan','yingxue','chi-yuan','jaerim','yujung','beia','michiru','nujin','yucai','ching-wai','correa','dmytro','sergiu','zhengzi','chung-ying','chutima','s.','poh','rosen','weiwei','yichong','yifang','bingzhi','nicolas-aldebrando','xiaomin','you-il','jose','linxi','volodymyr','xiaohua','jinzhu','marzilli','ayfer','maoliang','tisamarie','chonnikarn','jose','troiano','charles-henri','gaoyan','sreemati','vardges','asanga','fanyin','lilei','rezwan','yizhak','chengyan','lilei','oyebola','sangram','zhaoning','jisung','mingzhu','thummim','yuxiao','afet','sung-joo','woonam','husaina','joonyoung','junyi','millu','wonsuk','hyunduk','sung-ju','w.','fei','shu-ling','boreum','byeonghwa','endrizal','guang','piyali','jieshuang','zhao','hewei','kwangyong','meng-wei','muchamad','shuze','takuji','yu-hsin','bingjie','didem','j.','kahwa','dilya','geret','hyunsoo','takuji','upamanyu','jianzhi','matija','chenfeng','rubaba','weijia','dun','holti','katayoun','yiqun','emekcan','seoungwoo','sijing','haomin','uttara','wenjun','xuezhen','chien-chia','f.','lijing','liyun','cagatay','jongsang','jongyearn','hyunjee','seb','nicloas','sutirtha','uniko','changkeun','jiyoon','chenyue','fudong','guodong','jiang','minjoon','qinggong','taejun','sreyoshi','sui-jade','xiaoqing','yiyuan','dimitrije','dongik','yipei','guihong','reiping','wonho','yenan','dingming','madhu','sasiwooth','hyunchul','seonyoung','zhang','daolu','dulguun','jinyue','shihui','tayyar','xudong','leiyu','namho','pei-cheng','canhui','gajendran','zhifeng','li-pin','mengying','yanghao','yinxiao','jungho','ning','dawei','suehyn','heekyung','horacia','wanli','joonhwan','hoai-luu','reshmaan','ruixun','youngjun','zeyuan','dejanir','j.','ludovica','mariaflavia','hongkai','mengxi','chaleampong','desu','dooyeon','jongwoo','chilei','eunyoung','myounggin','nakarin','cuicui','monthien','seunghwa','yingying','junghwan','suhyeon','sungsam','yeonjei','miaoying','sukampon','ashesh','wenjuan','yankuic','doosoo','fei','po-chun','hyunsoo','jungmin','riju','yimin','jianjian','tingliang','zitao','bingxiao','jinxiang','tsu-ting','umud','seyedmorteza','bingyang','jose-antonio','kanis','qiuping','ludovico','weifeng','yannay','narasimha','zhenduo','b.','arjada','husnu','linyi','jau-er','baiyu','bledi','didac','hakon','yu-wei','klaus-peter','shengxing','shunxin','jianhuan','paulo','deepal','yunhui','ercan','joseba','xiaoye','dongwoo','kyoungsoo','mithuna','somasree','yuanjie','guo','huimin','hyunju','ranajoy','siwapong','ruohan','shuying','chiranjit','jonghyeon','kyoung','lini','enkhtuvshin','cheuk','daeyoung','jaroslav','jongwook','pandeli','yeochang','gui','heejeong','jeevant','jiansheng','junqiushi','shin-yi','siqi','tuo','shlomi','xiaoling','xiaotong','giridhar','meixia','sungmun','weicheng','jiangmin','zhenyu','qingqing','shaowei','chenchuan','jeong-ho','xiaochen','sehyoun','xiaoyang','yulong','zongbo')
+
+jmc_first_names3 = c('sergii','shoumitro','worawan','xun','mouhao','shujie','yu-wei','jiaming','jung-woo','m.','minsoo','qin','shonel','yanping','chun-miin','ethem','jiaming','qiong','saziye','somdutta','souvik','chen-hao','chun-ting','jicheng','rong','s','watura','hoonsik','huihui','kyoochul','sergii','tsz','wiroy','bulat','chaohai','oleksii','pathikrit','shigeki','xiaolu','gunhaeng','jianpeng','wenjing','pier-andre','adugna','wenbo','svenja','byoung','cheuk','jiseob','jiyoon','xiaobo','jongsuk','kyooho','yunjeen','choonsung','liquan','sulagna','taejun','yicheng','bingchao','ruoyan','pianpian','yangwei','tokura','xiaochen','xiaoling','howei','wichsinee','guzman','huiyu','mingjun','xiaowei','egemen','yiqing','','ishuwar','oriol','raviv','darmawan','meng-shiuh','seong','shuoxun','shuoxun','sungbok','xiaoyan','xinrong','yuquan','changwoo','eul','guangyi','hankyeung','jianhong','rajorshi','shao-chieh','shuoxun','siyi','sung-ick','xinrong','zixia','hursit','siyi','sungmin','hui-chun','jian-da','jinkook','jose','jui-chung','shuang','xiaoyuan','ajalavat','ajalavat','napon','pian','xi','dongni','guannan','hsin-hung','hyosung','jaegeum','vijetha','xinghua','yajuan','yaojing','yutang','zhengzheng','douyoung','ghufran','jaegeum','junyi','marÃ¬a','shenzhe','xirong','yaojing','yiying','zhengzheng','darong','naibao','wenzheng','yongzhi','ce','xiaodan','haimin','jinwen','mingzhi','guoshi','shampa','tzu-ting','zhe','zhengfei','bingjing','bipasha','guidon','anujit','jutong','pierluca','ruoying','minki','suchanan','eisuke','junghoon','chungsang','hua','serhiy','yi-lin','avihay','narapong','chattrin','denrick','hanzhe','il','jianlin','seongkyu','xingxing','yongning','youn','ziyi','binbin','raluca','sihoon','bong-geun')
+
+jmc_first_names4 = c('guanhao','heung','hosein','jialin','luyi','munseob','nayoung','xiliang','jaeyoon','joonhwi','misung','taeju','weiting','xiaolong','yihe','yinan','vaidyanathan','taekyoon','bravishwar','morvarid','wilko','gonca','xiaolan','yu-jing','hyo','jen-wen','menghan','miao','siwei','ruoyao','sibo','wenbo','fanghua','liyan','rongzhang','shekhar','youngjin','yunfan','hee-seung','oana','j.','chim','xiahua','jedrzej','hie','oleksiy','jungbin','yoshiyuki','ahmad-reza','onyi','qihui','sieuwerd','wenbin','won-ki','xiaxin','zhenting','cagdas','eeshani','jebaraj','tianwei','euler','namhyun','vidisha','aguinaldo','eui','gui','chia-ling','jiaying','kedir','masanori','sungyup','xiaoying','kijin','baowei','chak','nopphol','wonchul','ozge','teerawut','racha','riha','yiyi','zhengqi','atet','ching-ching','chunxiao','hanwei','heather-leigh','yunxiao','ipsita','kanat','fei','myat','tanmoy','a.','chenying','hongseok','m.','necati','xiangting','hoikwang','wenjie','zhao','eun-young','mengke','naijia','suryun','ye-na','kotbee','molin','qiusha','seul','zehao','zenan','chunzan','ekim','fujie','junwen','vesa-heikki','yanhao','yinyin','kunhee','peichun','rossa','xingtan','yunan','maria','phebo','toban','zhesheng','hongchun','po-an','felicito','hyunjoon','jingran','mihye','yanyu','ardeshir','fynnwin','guangwen','junwei','shuyang','younoh','yusun','haojun','hyojin','ahram','li-hao','nazmul','yaoyao','junjie','kyunhwa','oconnor','mingming','seungwoo','urvashi','harindra','lider','mingxiao','tat-kei','w.','leilei','florenta','grigorios','hidenori','ba','ding','hidenori','ho-nam','mayvis','alfia','dameng','qiao','uros','mary-ellen','golam','maripier','rosemonde','do-il','haixi','hon','ming-feng','xiaodong','hisatoshi','hsueh-hsiang','jen-che','jiao','mengying','seok','ying-ying','youngwook','zhong','cheng-ying','jiabin','qiurong','suphanit','tomohiko','xiaoli','haomin','hsuan-chih','hsuan-li','kayuna','tzu-chi','ya-ting','zhentong','byunghoon','chenyan','gihwan','jianrong','junjie','rashesh','suyeon','wisarut','xianwei','yongbaek','duo','eishiro','fei','ramon,','srinivasan','woan','cristian','eunsun','fumitaka','jangsu','junhui','mingxuan','norihiko','nouhoum','qianyu','toshiaki','wanyi','wontae','charad','cihan','marnix','yaxin','muthoni','shuping','yaxin','byoung','snaebjorn','vis','byoung','hongda','xiaoxue','das','dongkyu','foa','langan','eunhee','shameel','zhihao','haobin','lezhen','maliheh')
+
+givenNames1 = findGivenNames(jmc_first_names, progress = FALSE)
+givenNames2 = findGivenNames(jmc_first_names2, progress = FALSE)
+givenNames3 = findGivenNames(jmc_first_names3, progress = FALSE)
+givenNames4 = findGivenNames(jmc_first_names4, progress = FALSE)
+```
+
+
+```{r}
+#combine female predictions
+combined_first_names = rbind(givenNames1, givenNames2, givenNames3, givenNames4)
+#rename column names to match Alice table
+names(combined_first_names) <- c('first_name','gender','probability','count')
+combined_first_names
+```
+
+```{r}
+library(openxlsx)
+#import Alice table
+female_R_import <- read.xlsx("/Users/bharveepatel/Dropbox/economists/JMC/bharvee/female_R_import.xlsx")
+#combine female predictions and Alice table
+firstnames_gender_table <- merge(female_R_import,combined_first_names, by='first_name')
+
+#export as xlsx
+write.xlsx(firstnames_gender_table,"/Users/bharveepatel/Dropbox/economists/JMC/bharvee/first_names_gender_table.xlsx")
+```
+
+```{r}
+library(dplyr)
+#choose only probability >.9
+firstnames_gender_table%>%filter(probability >.9)
+#do manual check of random sample of 50
+
+```
