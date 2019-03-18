@@ -1,0 +1,201 @@
+\documentclass{article}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+**What is Churn?**
+In the customer management, **customer churn** refers to a decision made by the customer about ending the business relationship. It is also referred as loss of clients or customers. Customer loyalty and customer churn always add up to 100%. 
+
+It is very important to predict the users likely to churn from business relationship and the factors affecting the customer decisions. This analysis shows how logistic regression model, support vector machines and the random forest model can be used to identify the customer churn in the telecom dataset.
+
+**The Data**
+The "churn" data set was developed to predict telecom customer churn based on information about their account. The data files state that the data are "artificial based on claims similar to real world".
+<<>>=
+#Packages used in analysis
+library(ggplot2)
+library(reshape2)
+library(corrplot)
+library(e1071)
+library(caret)
+library(rpart)
+library(C50)
+library(party)
+library(partykit)
+library(randomForest)
+library(ROCR)
+library(dplyr)
+library(car)
+@
+
+<<>>=
+#reading in data from C50 package
+library(C50)
+data(churn)
+test <- churnTest
+train <- churnTrain
+mydata <- rbind(test,train)
+#Tranforming variables to numeric form 
+#no=1, yes =0
+mydata$churn <- as.integer(mydata$churn)
+mydata$churn[mydata$churn == "1"] <- 1
+mydata$churn[mydata$churn == "2"] <- 0
+
+mydata$international_plan <-as.integer(mydata$international_plan)
+mydata$international_plan[mydata$international_plan == "1"] <- 0
+mydata$international_plan[mydata$international_plan == "2"] <- 1
+
+mydata$voice_mail_plan <- as.integer(mydata$voice_mail_plan)
+mydata$voice_mail_plan[mydata$voice_mail_plan == "1"] <- 0
+mydata$voice_mail_plan[mydata$voice_mail_plan == "2"] <- 1
+@
+
+<<>>=
+#Removing unwanted variables for analysis
+mydata$state <- NULL
+mydata$area_code <- NULL
+#Remove observations that are missing from datasell
+na.omit(mydata) %>%
+  head()
+@
+
+<<>>=
+#Now begin exploratory data analysis
+#Summarize dataset
+summary(mydata)
+sapply(mydata, sd)
+
+cormatrix <- round(cor(mydata), digits = 2 )
+cormatrix
+
+plot.new()
+plot(mydata$churn ~mydata$total_day_minutes)
+title('Basic Scatterplot')
+
+ggplot(mydata, aes(x=mydata$total_day_minutes)) + geom_histogram(binwidth = 1, fill = "white", color = "black")
+@
+
+<<>>=
+#Randomly split data into train and test set
+#70% will be ssigned to train set, 30% will be assigned to tst set
+
+set.seed(1234)
+ind <- sample(2, nrow(mydata), replace = TRUE, prob = c(.7,.3))
+traindata <- mydata[ind == 1,]
+testdata <- mydata[ind == 2,]
+@
+
+<<>>=
+#Forward elimination
+#Lower AIC indicates a better model
+
+forward <- step(glm(churn ~ 1, data = traindata), direction = 'forward', scope = ~ account_length + international_plan + voice_mail_plan + number_vmail_messages + total_day_minutes + total_day_calls + total_day_charge + total_eve_minutes + total_eve_calls + total_eve_charge + total_night_minutes + total_night_calls + total_night_charge + total_intl_minutes + total_intl_calls + total_intl_charge + number_customer_service_calls)
+@
+
+According to the significant codes above, we see which variables are significant. I perform further analysis on total_day_charge, number_vmail_messages, total_intl_charge and total_eve_minutes.
+
+<<>>=
+logit <- glm(churn ~ total_day_charge + number_vmail_messages+ total_intl_charge + total_eve_minutes, data = traindata, family = "binomial")
+summary(logit)
+@
+
+<<>>=
+#evaluate model's fit and performance
+influenceIndexPlot(logit, vars = c('Cook', "hat"), id.n =4)
+@
+
+<<>>=
+# Confidence interval using log-likelihood
+confint(logit)
+exp(logit$coefficients)
+exp(confint(logit)) #odds ratio
+@
+
+The odds ratio says, "what are the odd of an outcome happening as a result of a change in some variable.  For example, for each unit increase in international charge, there is an 18% increase in the likelihood of churning (leaving the company or business."
+
+<<>>=
+# Making a support vector machine (another prediction model)
+svm_model <- svm(churn ~., data= traindata, gamma = .1, cost =1) 
+print(svm_model)
+summary(svm_model)
+@
+
+<<>>=
+#Random forest model- takes decision trees and averages them
+rf <- randomForest(churn ~., data= traindata, ntree = 500, mtry = 5, importance = TRUE)
+print(rf)
+importance(rf)
+@
+
+<<>>=
+plot.new()
+varImpPlot(rf, type = 1, pch = 17, col = 1, cex = 1.0, main = "")
+abline(v= 45, col= "red")
+@
+
+To the right of the red line are the vairables: number of customer service calls, international plan and total international calls. That is saying these are the most important factors in determining customer churn. Intuitively, this makes sense. A customer who has to receive many customer service calls to resolve an issue would likely become frustrated and leave their business with the company.
+
+<<>>=
+mydata$churn <- as.factor(mydata$churn)
+
+#algorithm for decision tree
+tree <- C5.0(churn ~., data = mydata)
+summary(tree)
+results <- C5.0(churn ~., data = mydata, rules = TRUE)
+summary(results)
+@
+
+There are many rules here, but let's look at rule 9. It is saying if the total minutes in the day exceed 277.7 and total evening minutes exceed 152.7, the customer is likely to leave the company. This can be used to derive business insight.
+
+<<>>=
+#Check what models are better then others
+logistic_model <- predict(logit, testdata, type = "response")
+svm_predict <- predict(svm_model, testdata, type = "response")
+rf_predict <- predict(rf, testdata, type = "response")
+testdata$Yhat1 <- logistic_model
+testdata$Yhat2 <- svm_predict
+testdata$Yhat3 <- rf_predict
+
+#setting threshold parameters
+predict1 <- function(x) ifelse(logistic_model > x, 1, 0)
+predict2 <- function(x) ifelse(svm_predict > x, 1, 0)
+predict3 <- function(x) ifelse(rf_predict > x, 1, 0)
+confusionMatrix(predict1(.5), testdata$churn)
+confusionMatrix(predict2(.5), testdata$churn)
+confusionMatrix(predict3(.5), testdata$churn)
+```
+```{r}
+#Graph the results
+predict_1 <- prediction(testdata$Yhat1, testdata$churn)
+predict_2 <- prediction(testdata$Yhat2, testdata$churn)
+predict_3 <- prediction(testdata$Yhat3, testdata$churn)
+
+performance1 <- performance(predict_1, "tpr", "fpr")
+performance2 <- performance(predict_2, "tpr", "fpr")
+performance3 <- performance(predict_3, "tpr", "fpr")
+
+plot.new()
+plot(performance1, col= "yellow")
+plot(performance2, add = TRUE, col= "blue")
+plot(performance3, add = TRUE, col= "green")
+abline(0,1, col = "red")
+title("ROC curve")
+legend(.8, .4,c("Logistic", "SVM", "Random Forest"), 
+       lty = c(1,1,1), 
+       lwd = c(1.4, 1.4,1.4), col = c("yellow", "blue", "green"))
+@
+
+We want a line around the perimeter. Therefore, the random forest model is the best fit for the data. To see its accuracy, we find the AUC (area under the curve):
+<<>>=
+accuracy_log <- performance(predict_1, "auc")
+accuracy_svm <- performance(predict_2, "auc")
+accuracy_rf <- performance(predict_3, "auc")
+accuracy_log
+accuracy_svm
+accuracy_rf
+@
+
+It shows that the random forest model is about 92.9 percent accurate.
+
+
+
+\end{document}
